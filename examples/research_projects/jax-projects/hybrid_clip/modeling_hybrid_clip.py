@@ -385,7 +385,7 @@ class FlaxHybridCLIP(FlaxPreTrainedModel):
                 text_config = AutoConfig.from_pretrained(text_model_name_or_path)
                 kwargs_text["config"] = text_config
 
-            text_model = FlaxAutoModel.from_pretrained(text_model_name_or_path, *model_args, **kwargs_text)
+            text_model = FlaxAutoModel.from_pretrained(text_model_name_or_path,from_pt=True, *model_args, **kwargs_text)
 
         vision_model = kwargs_vision.pop("model", None)
         if vision_model is None:
