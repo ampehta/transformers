@@ -50,6 +50,8 @@ from flax.training.common_utils import get_metrics, shard, shard_prng_key
 from modeling_hybrid_clip import FlaxHybridCLIP
 from transformers import AutoTokenizer, HfArgumentParser, TrainingArguments, is_tensorboard_available, set_seed
 
+from pororo import Pororo
+
 
 logger = logging.getLogger(__name__)
 
@@ -361,6 +363,8 @@ def main():
         captions_per_image=1,
         transform=preprocess,
     )
+    # Import Translation Pipeline
+    mt = Pororo(task="translation", lang="multi")
 
     # Store some constant
     num_epochs = int(training_args.num_train_epochs)
@@ -372,7 +376,8 @@ def main():
     # Use collate function to tokenizer the text and convert the processed images to numpy
     def collate_fn(examples):
         pixel_values = torch.stack([example[0] for example in examples]).permute(0, 2, 3, 1).numpy()
-        captions = [example[1] for example in examples]
+        en_captions = [example[1] for example in examples]
+        captions = [mt(text, src='en', tgt="ko") for text in en_captions]
         inputs = tokenizer(captions, max_length=data_args.max_seq_length, padding="max_length", return_tensors="np")
 
         batch = {
